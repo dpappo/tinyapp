@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8080;
 
@@ -54,6 +55,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL/edit", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.updatedURL;
   res.redirect(`/urls/${req.params.shortURL}`);
+});
+
+app.post("/login", (req, res) => {
+  let username = req.body.username;
+  res.cookie('username', username);
+  res.redirect(`/urls/`);
 });
 
 
