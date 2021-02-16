@@ -109,13 +109,24 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect('/urls');
+  if (req.cookies["userID"] !== urlDatabase[req.params.shortURL].userID) {
+    res.send("This is not your URL");
+  } else {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect('/urls');
+  }
 });
 
 app.post("/urls/:shortURL/edit", (req, res) => {
-  urlDatabase[req.params.shortURL].longURL = req.body.updatedURL;
-  res.redirect(`/urls/${req.params.shortURL}`);
+  // res.redirect(`/urls/${req.params.shortURL}`);
+  
+  if (req.cookies["userID"] !== urlDatabase[req.params.shortURL].userID) {
+    res.send("This is not your URL");
+  } else {
+    urlDatabase[req.params.shortURL].longURL = req.body.updatedURL;
+    res.redirect(`/urls/${req.params.shortURL}`);
+  }
+
 });
 
 app.post("/login", (req, res) => {
