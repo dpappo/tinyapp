@@ -66,7 +66,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get('/register', (req, res) => {
   const templateVars = {
-    email: users[req.cookies["userID"]].email
+    email: undefined
   };
   res.render("register", templateVars);
 });
@@ -94,21 +94,34 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
-  res.redirect(`/urls/`);
+  res.clearCookie("userID");
+  res.redirect(`/register`);
 });
 
 app.post("/register", (req, res) => {
   const userID = generateRandomString();
-  users[userID] = {
-    id: userID,
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.cookie('userID', userID);
-  res.redirect(`/urls/`);
+  if (req.body.email === "" || req.body.password === "") {
+    res.sendStatus(400);
+  } else if (emailDuplicateLookup(req.body.email, users)) {
+    res.sendStatus(400);
+  } else {
+    users[userID] = {
+      id: userID,
+      email: req.body.email,
+      password: req.body.password
+    };
+    res.cookie('userID', userID);
+    res.redirect(`/urls/`);
+  }
 });
 
+const emailDuplicateLookup = function(email, database) {
+  for (let item in database) {
+    if (database[item].email === email) {
+      return true;
+    }
+  } return false;
+};
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
