@@ -95,9 +95,18 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  let username = req.body.username;
-  res.cookie('username', username);
-  res.redirect(`/urls/`);
+  const email = req.body.email;
+  const pass = req.body.password;
+
+  if (checkEmailExists(email, users) && pass === users[lookupIDFromEmail(email, users)].password) {
+    res.cookie('userID', lookupIDFromEmail(email, users));
+    res.redirect(`/urls/`);
+  } else if (!checkEmailExists(email, users)) {
+    res.status(403).send("User does not exist");
+  } else if (checkEmailExists(email, users) && pass !== users[lookupIDFromEmail(email, users)]) {
+    res.status(403).send("Wrong password mate, try again");
+  }
+
 });
 
 app.post("/logout", (req, res) => {
@@ -109,7 +118,7 @@ app.post("/register", (req, res) => {
   const userID = generateRandomString();
   if (req.body.email === "" || req.body.password === "") {
     res.status(400).send("Email and password required");
-  } else if (emailDuplicateLookup(req.body.email, users)) {
+  } else if (checkEmailExists(req.body.email, users)) {
     res.status(400).send("Email already registered");
   } else {
     users[userID] = {
@@ -122,13 +131,22 @@ app.post("/register", (req, res) => {
   }
 });
 
-const emailDuplicateLookup = function(email, database) {
+const checkEmailExists = function(email, database) {
   for (let item in database) {
     if (database[item].email === email) {
       return true;
     }
   } return false;
 };
+
+const lookupIDFromEmail = function(email, database) {
+  for (let item in database) {
+    if (database[item].email === email) {
+      return item;
+    }
+  }
+};
+
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
