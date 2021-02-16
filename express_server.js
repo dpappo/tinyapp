@@ -55,10 +55,15 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const templateVars = {urls: urlDatabase,
-    email: users[req.cookies["userID"]].email
-  };
-  res.render("urls_index", templateVars);
+  if (users[req.cookies["userID"]] !== undefined) {
+    const templateVars = {
+      urls: urlDatabase,
+      email: users[req.cookies["userID"]].email
+    };
+    res.render('urls_index', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -157,7 +162,7 @@ const lookupIDFromEmail = function(email, database) {
 
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   
   res.redirect(longURL);
 });
