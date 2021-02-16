@@ -33,10 +33,15 @@ const users = {
 };
 
 app.get('/', (req, res) => {
-  const templateVars = {urls: urlDatabase,
-    email: users[req.cookies["userID"]].email
-  };
-  res.render("urls_index", templateVars);
+  if (users[req.cookies["userID"]] !== undefined) {
+    const templateVars = {
+      urls: urlDatabase,
+      email: users[req.cookies["userID"]].email
+    };
+    res.render('urls_index', templateVars);
+  } else {
+    res.send("You have to log in first");
+  }
 });
 
 app.get('/urls.json', (req, res) => {
@@ -50,19 +55,19 @@ app.get('/urls/new', (req, res) => {
     };
     res.render('urls_new', templateVars);
   } else {
-    res.redirect('/login');
+    res.send("You have to log in first");
   }
 });
 
 app.get('/urls', (req, res) => {
   if (users[req.cookies["userID"]] !== undefined) {
     const templateVars = {
-      urls: urlDatabase,
+      urls: urlsForUser(req.cookies["userID"],urlDatabase),
       email: users[req.cookies["userID"]].email
     };
     res.render('urls_index', templateVars);
   } else {
-    res.redirect('/login');
+    res.send("You have to log in first");
   }
 });
 
@@ -70,7 +75,13 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
     email: users[req.cookies["userID"]].email
   };
-  res.render("urls_show", templateVars);
+
+  if (req.cookies["userID"] !== urlDatabase[req.params.shortURL].userID) {
+    res.send("This is not your URL");
+  } else {
+    res.render("urls_show", templateVars);
+  }
+
 });
 
 app.get('/register', (req, res) => {
@@ -158,6 +169,17 @@ const lookupIDFromEmail = function(email, database) {
       return item;
     }
   }
+};
+
+const urlsForUser = function(userID, database) {
+  const returnObject = {};
+
+  for (let item in database) {
+    if (database[item].userID === userID) {
+      returnObject[item] = {longURL: database[item].longURL, userID: userID};
+    }
+  }
+  return returnObject;
 };
 
 
