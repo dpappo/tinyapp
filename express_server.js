@@ -17,18 +17,8 @@ const urlDatabase = {
 const users = {
   "userRandomID": {
     id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  },
-  "zosdkg": {
-    id: "zosdkg",
-    email: "testing@google.com",
-    password: "lololol"
+    email: "dpappo@gmail.com",
+    password: "a"
   }
 };
 
@@ -196,7 +186,6 @@ const urlsForUser = function(userID, database) {
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
-  
   res.redirect(longURL);
 });
 
@@ -206,5 +195,5 @@ const generateRandomString = function() {
 
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`);
+  console.log(`TinyApp Server listening on port ${PORT}`);
 });
