@@ -15,7 +15,10 @@ const urlDatabase = {
 };
 
 app.get('/', (req, res) => {
-  res.send("Hello!");
+  const templateVars = {urls: urlDatabase,
+    username: req.cookies["username"],
+  };
+  res.render("urls_index", templateVars);
 });
 
 app.get('/urls.json', (req, res) => {
