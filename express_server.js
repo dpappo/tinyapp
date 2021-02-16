@@ -71,6 +71,13 @@ app.get('/register', (req, res) => {
   res.render("register", templateVars);
 });
 
+app.get('/login', (req, res) => {
+  const templateVars = {
+    email: undefined
+  };
+  res.render("login", templateVars);
+});
+
 app.post("/urls", (req, res) => {
   let shortenedURL = generateRandomString();
   urlDatabase[shortenedURL] = req.body.longURL;
@@ -95,15 +102,15 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("userID");
-  res.redirect(`/register`);
+  res.redirect(`/login`);
 });
 
 app.post("/register", (req, res) => {
   const userID = generateRandomString();
   if (req.body.email === "" || req.body.password === "") {
-    res.sendStatus(400);
+    res.status(400).send("Email and password required");
   } else if (emailDuplicateLookup(req.body.email, users)) {
-    res.sendStatus(400);
+    res.status(400).send("Email already registered");
   } else {
     users[userID] = {
       id: userID,
