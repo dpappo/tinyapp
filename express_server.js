@@ -44,10 +44,14 @@ app.get('/urls.json', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  const templateVars = {
-    email: users[req.cookies["userID"]].email
-  };
-  res.render('urls_new', templateVars);
+  if (users[req.cookies["userID"]] !== undefined) {
+    const templateVars = {
+      email: users[req.cookies["userID"]].email
+    };
+    res.render('urls_new', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/urls', (req, res) => {
