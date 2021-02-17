@@ -18,11 +18,6 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000
 }));
 
-//TODO
-//Modularize
-//README
-
-
 const urlDatabase = {
   'b6UTxQ': { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   'i3BoGr': { longURL: "https://www.google.ca", userID: "aJ48lW" }
