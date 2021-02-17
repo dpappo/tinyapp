@@ -6,6 +6,7 @@ const {checkEmailExists,
   urlsForUser,
   generateRandomString} = require("./helpers");
 const bcrypt = require('bcrypt');
+
 const app = express();
 const PORT = 8080;
 
@@ -14,10 +15,12 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
   keys: ["g-d"],
-
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  maxAge: 24 * 60 * 60 * 1000
 }));
+
+//TODO
+//Modularize
+//README
 
 
 const urlDatabase = {
@@ -26,12 +29,14 @@ const urlDatabase = {
 };
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
+  "aJ48lW": {
+    id: "aJ48lW",
     email: "dpappo@gmail.com",
     password: bcrypt.hashSync("a", 10)
   }
 };
+
+//Are you ready for some routing?
 
 app.get('/', (req, res) => {
   if (users[req.session.user_id] !== undefined) {
@@ -104,6 +109,8 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+//Ok now we're going to make some POSTs
+
 app.post("/urls", (req, res) => {
   let shortenedURL = generateRandomString();
   urlDatabase[shortenedURL] = {
@@ -124,21 +131,19 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL/edit", (req, res) => {
-  // res.redirect(`/urls/${req.params.shortURL}`);
-  
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
     res.send("This is not your URL");
   } else {
     urlDatabase[req.params.shortURL].longURL = req.body.updatedURL;
     res.redirect(`/urls/${req.params.shortURL}`);
   }
-
 });
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const pass = req.body.password;
 
+  // Let's serve the right error messages to users depending on how they mess up on the login page
   if (checkEmailExists(email, users) && bcrypt.compareSync(pass, users[getUserByEmail(email, users)].password)) {
     req.session.user_id = ('userID', getUserByEmail(email, users));
     res.redirect(`/urls/`);
@@ -172,9 +177,7 @@ app.post("/register", (req, res) => {
   }
 });
 
-
-
-
+// Are you even listening?
 app.listen(PORT, () => {
   console.log(`TinyApp Server listening on port ${PORT}`);
 });
