@@ -1,6 +1,10 @@
 const express = require('express');
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
+const {checkEmailExists,
+  getUserByEmail,
+  urlsForUser,
+  generateRandomString} = require("./helpers");
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080;
@@ -95,6 +99,11 @@ app.get('/login', (req, res) => {
   res.render("login", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  res.redirect(longURL);
+});
+
 app.post("/urls", (req, res) => {
   let shortenedURL = generateRandomString();
   urlDatabase[shortenedURL] = {
@@ -130,12 +139,12 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const pass = req.body.password;
 
-  if (checkEmailExists(email, users) && bcrypt.compareSync(pass, users[lookupIDFromEmail(email, users)].password)) {
-    req.session.user_id = ('userID', lookupIDFromEmail(email, users));
+  if (checkEmailExists(email, users) && bcrypt.compareSync(pass, users[getUserByEmail(email, users)].password)) {
+    req.session.user_id = ('userID', getUserByEmail(email, users));
     res.redirect(`/urls/`);
   } else if (!checkEmailExists(email, users)) {
     res.status(403).send("User does not exist");
-  } else if (checkEmailExists(email, users) && !bcrypt.compareSync(pass, users[lookupIDFromEmail(email, users)])) {
+  } else if (checkEmailExists(email, users) && !bcrypt.compareSync(pass, users[getUserByEmail(email, users)])) {
     res.status(403).send("Wrong password mate, try again");
   }
 
@@ -163,42 +172,7 @@ app.post("/register", (req, res) => {
   }
 });
 
-const checkEmailExists = function(email, database) {
-  for (let item in database) {
-    if (database[item].email === email) {
-      return true;
-    }
-  } return false;
-};
 
-const lookupIDFromEmail = function(email, database) {
-  for (let item in database) {
-    if (database[item].email === email) {
-      return item;
-    }
-  }
-};
-
-const urlsForUser = function(userID, database) {
-  const returnObject = {};
-
-  for (let item in database) {
-    if (database[item].userID === userID) {
-      returnObject[item] = {longURL: database[item].longURL, userID: userID};
-    }
-  }
-  return returnObject;
-};
-
-
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
-});
-
-const generateRandomString = function() {
-  return Math.random().toString(36).substr(2, 6);
-};
 
 
 app.listen(PORT, () => {
