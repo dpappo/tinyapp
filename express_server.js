@@ -1,11 +1,13 @@
 const express = require('express');
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
+const bcrypt = require('bcrypt');
+
+// helper functions
 const {checkEmailExists,
   getUserByEmail,
   urlsForUser,
   generateRandomString} = require("./helpers");
-const bcrypt = require('bcrypt');
 
 const app = express();
 const PORT = 8080;
@@ -18,6 +20,7 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000
 }));
 
+// for this project, we have two objects below acting as simple data stores
 const urlDatabase = {
   'b6UTxQ': { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   'i3BoGr': { longURL: "https://www.google.ca", userID: "aJ48lW" }
@@ -31,8 +34,7 @@ const users = {
   }
 };
 
-//Are you ready for some routing?
-
+// gets:
 app.get('/', (req, res) => {
   if (users[req.session.user_id] !== undefined) {
     const templateVars = {
@@ -46,7 +48,6 @@ app.get('/', (req, res) => {
       email: undefined
     };
     res.render('login', templateVars);
-    // res.send("You have to log in first");
   }
 });
 
@@ -66,7 +67,6 @@ app.get('/urls/new', (req, res) => {
       email: undefined
     };
     res.render('login', templateVars);
-    // res.send("You have to log in first");
   }
 });
 
@@ -78,16 +78,15 @@ app.get('/urls', (req, res) => {
     };
     res.render('urls_index', templateVars);
   } else {
-    const templateVars = {
-      urls: urlDatabase,
-      email: undefined
-    };
-    res.render('login', templateVars);
-    // res.send("You have to log in first");
+    res.send(`You have to log in first<br><a href="/login">Click here, friend</a>`);
   }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  if (!users[req.session.user_id]) {
+    res.send(`You have to log in first<br><a href="/login">Click here, friend</a>`);
+  }
+  
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
     email: users[req.session.user_id].email
   };
@@ -119,7 +118,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//Ok now we're going to make some POSTs
+//posts:
 
 app.post("/urls", (req, res) => {
   let shortenedURL = generateRandomString();
@@ -152,16 +151,17 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const pass = req.body.password;
 
-  // Let's serve the right error messages to users depending on how they mess up on the login page
+  // if user exists, and password matches:
   if (checkEmailExists(email, users) && bcrypt.compareSync(pass, users[getUserByEmail(email, users)].password)) {
     req.session.user_id = ('userID', getUserByEmail(email, users));
     res.redirect(`/urls/`);
+    // users does not exist
   } else if (!checkEmailExists(email, users)) {
-    res.status(403).send("User does not exist");
+    res.status(403).send(`User does not exist<br><a href="/register">Click here, friend</a>`);
+    // if user exists, but password does not match:
   } else if (checkEmailExists(email, users) && !bcrypt.compareSync(pass, users[getUserByEmail(email, users)])) {
-    res.status(403).send("Wrong password mate, try again");
+    res.status(403).send(`Wrong password mate, try again<br><a href="/login">Click here, friend</a>`);
   }
-
 });
 
 app.post("/logout", (req, res) => {
@@ -172,10 +172,11 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
   const userID = generateRandomString();
   if (req.body.email === "" || req.body.password === "") {
-    res.status(400).send("Email and password required");
+    res.status(400).send(`Email and password required<br><a href="/register">Click here, friend</a>`);
   } else if (checkEmailExists(req.body.email, users)) {
-    res.status(400).send("Email already registered");
+    res.status(400).send(`Email already registered<br><a href="/login">Click here, friend</a>`);
   } else {
+    // register user if all goes well
     users[userID] = {
       id: userID,
       email: req.body.email,
@@ -186,7 +187,6 @@ app.post("/register", (req, res) => {
   }
 });
 
-// Are you even listening?
 app.listen(PORT, () => {
   console.log(`TinyApp Server listening on port ${PORT}`);
 });
