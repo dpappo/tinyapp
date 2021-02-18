@@ -78,13 +78,19 @@ app.get('/urls', (req, res) => {
     };
     res.render('urls_index', templateVars);
   } else {
-    res.send(`You have to log in first<br><a href="/login">Click here, friend</a>`);
+    const templateVars = {error: 401,
+      message: `You have to log in first`,
+      link: "/login"};
+    res.status(401).render("error", templateVars);
   }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   if (!users[req.session.user_id]) {
-    res.send(`You have to log in first<br><a href="/login">Click here, friend</a>`);
+    const templateVars = {error: 401,
+      message: `You have to log in first`,
+      link: "/login"};
+    res.status(401).render("error", templateVars);
   }
   
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
@@ -92,7 +98,10 @@ app.get("/urls/:shortURL", (req, res) => {
   };
 
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
-    res.send("This is not your URL");
+    const templateVars = {error: 403,
+      message: `This is not your URL`,
+      link: "/login"};
+    res.status(403).render("error", templateVars);
   } else {
     res.render("urls_show", templateVars);
   }
@@ -131,7 +140,10 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
-    res.send("This is not your URL");
+    const templateVars = {error: 403,
+      message: `This is not your URL`,
+      link: "/login"};
+    res.status(403).render("error", templateVars);
   } else {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
@@ -140,7 +152,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:shortURL/edit", (req, res) => {
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
-    res.send("This is not your URL");
+    const templateVars = {error: 403,
+      message: `This is not your URL`,
+      link: "/login"};
+    res.status(403).render("error", templateVars);
   } else {
     urlDatabase[req.params.shortURL].longURL = req.body.updatedURL;
     res.redirect(`/urls/${req.params.shortURL}`);
@@ -150,17 +165,24 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const pass = req.body.password;
-
+  console.log("password: " + pass);
+  console.log("hash: " + pass);
   // if user exists, and password matches:
   if (checkEmailExists(email, users) && bcrypt.compareSync(pass, users[getUserByEmail(email, users)].password)) {
     req.session.user_id = ('userID', getUserByEmail(email, users));
     res.redirect(`/urls/`);
     // users does not exist
   } else if (!checkEmailExists(email, users)) {
-    res.status(403).send(`User does not exist<br><a href="/register">Click here, friend</a>`);
+    const templateVars = {error: 403,
+      message: `User does not exist`,
+      link: "/register"};
+    res.status(403).render("error", templateVars);
     // if user exists, but password does not match:
-  } else if (checkEmailExists(email, users) && !bcrypt.compareSync(pass, users[getUserByEmail(email, users)])) {
-    res.status(403).send(`Wrong password mate, try again<br><a href="/login">Click here, friend</a>`);
+  } else if (checkEmailExists(email, users) && !bcrypt.compareSync(pass, users[getUserByEmail(email, users)].password)) {
+    const templateVars = {error: 403,
+      message: `Wrong password mate, try again`,
+      link: "/login"};
+    res.status(403).render("error", templateVars);
   }
 });
 
@@ -172,9 +194,16 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
   const userID = generateRandomString();
   if (req.body.email === "" || req.body.password === "") {
-    res.status(400).send(`Email and password required<br><a href="/register">Click here, friend</a>`);
+    const templateVars = {error: 406,
+      message: `Email and password required`,
+      link: "/register"};
+    res.status(400).render("error", templateVars);
+
   } else if (checkEmailExists(req.body.email, users)) {
-    res.status(400).send(`Email already registered<br><a href="/login">Click here, friend</a>`);
+    const templateVars = {error: 406,
+      message: `Email already registered`,
+      link: "/login"};
+    res.status(400).render("error", templateVars);
   } else {
     // register user if all goes well
     users[userID] = {
