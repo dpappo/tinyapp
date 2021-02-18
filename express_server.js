@@ -165,8 +165,6 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const pass = req.body.password;
-  console.log("password: " + pass);
-  console.log("hash: " + pass);
   // if user exists, and password matches:
   if (checkEmailExists(email, users) && bcrypt.compareSync(pass, users[getUserByEmail(email, users)].password)) {
     req.session.user_id = ('userID', getUserByEmail(email, users));
