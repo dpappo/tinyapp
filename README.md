@@ -24,4 +24,4 @@ This version was written by [Dan Pappo](https://github.com/dpappo), as part of h
 ## Getting Started
 
 - Install all dependencies (using the `npm install` command).
-- Run the development web server using the `node express_server.js` command.
+- Run the development web server using the `npm start` command.
