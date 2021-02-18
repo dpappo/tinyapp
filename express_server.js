@@ -41,7 +41,12 @@ app.get('/', (req, res) => {
     };
     res.render('urls_index', templateVars);
   } else {
-    res.send("You have to log in first");
+    const templateVars = {
+      urls: urlDatabase,
+      email: undefined
+    };
+    res.render('login', templateVars);
+    // res.send("You have to log in first");
   }
 });
 
@@ -56,7 +61,12 @@ app.get('/urls/new', (req, res) => {
     };
     res.render('urls_new', templateVars);
   } else {
-    res.send("You have to log in first");
+    const templateVars = {
+      urls: urlDatabase,
+      email: undefined
+    };
+    res.render('login', templateVars);
+    // res.send("You have to log in first");
   }
 });
 
@@ -68,7 +78,12 @@ app.get('/urls', (req, res) => {
     };
     res.render('urls_index', templateVars);
   } else {
-    res.send("You have to log in first");
+    const templateVars = {
+      urls: urlDatabase,
+      email: undefined
+    };
+    res.render('login', templateVars);
+    // res.send("You have to log in first");
   }
 });
 
@@ -112,7 +127,6 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
     userID: req.session.user_id
   };
-  console.log(urlDatabase);
   res.redirect('/urls/' + shortenedURL);
 });
 
