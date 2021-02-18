@@ -10,7 +10,6 @@ const checkEmailExists = function(email, database) {
 const getUserByEmail = function(email, database) {
   for (let item in database) {
     if (database[item].email === email) {
-      console.log(item);
       return item;
     }
   }
