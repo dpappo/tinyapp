@@ -37,6 +37,7 @@ const users = {
 // now for some analytics
 const analytics = {};
 const uniques = {};
+const visitTimes = {};
 
 const countUniques = function(object) {
   let sum = 0;
@@ -108,8 +109,15 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
     email: users[req.session.user_id].email,
     analytics: analytics[req.params.shortURL],
-    uniqueFunction: countUniques(uniques)
+    // uniqueFunction: uniques[req.params.shortURL].length,
+    times: JSON.stringify(visitTimes)
   };
+
+  if (uniques[req.params.shortURL]) {
+    templateVars.uniqueFunction = uniques[req.params.shortURL].length;
+  } else {
+    templateVars.uniqueFunction = "Not viewed yet";
+  }
 
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
     const templateVars = {error: 403,
@@ -117,11 +125,6 @@ app.get("/urls/:shortURL", (req, res) => {
       link: "/login"};
     res.status(403).render("error", templateVars);
   } else {
-    // if (!analytics[req.params.shortURL]) {
-    //   analytics[req.params.shortURL] = 1;
-    // } else {
-    //   analytics[req.params.shortURL]++;
-    // }
     res.render("urls_show", templateVars);
   }
 
@@ -149,10 +152,17 @@ app.get("/u/:shortURL", (req, res) => {
     analytics[req.params.shortURL]++;
   }
 
-  if (!uniques[req.session.user_id]) {
-    uniques[req.session.user_id] = 1;
+  if (!uniques[req.params.shortURL]) {
+    uniques[req.params.shortURL] = [req.session.user_id];
+  } else if (uniques[req.params.shortURL].includes(req.session.user_id)) {
+    console.log("quiet, fool!");
+  } else {
+    uniques[req.params.shortURL].push(req.session.user_id);
   }
-
+  
+  if (!visitTimes[new Date]) {
+    visitTimes[new Date] = req.session.user_id;
+  }
   res.redirect(longURL);
 });
 

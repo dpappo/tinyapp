@@ -27,10 +27,16 @@
                 <% } %>
                   <br>
 
-                  <% if (uniqueFunction) { %>
+                  <% if (uniqueFunction !=="Not viewed yet" ) { %>
                     Uniquely viewed: <%= uniqueFunction %> time<% if (uniqueFunction> 1) { %>s
                         <% } %>
                           <% } %>
+                            <br>
+                            <!-- <% if (times) { %>
+                              Timestamp log:
+                              <br>
+                              <%=times %>
+                                <% } %> -->
 
 
       </p>
