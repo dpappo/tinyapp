@@ -21,7 +21,18 @@
       <p class="card-text">Short URL: <a href="/u/<%= shortURL %>">
           <%= shortURL %>
         </a> <br>
-        Viewed: <%= analytics %> times
+        <% if (analytics) { %>
+          Viewed: <%= analytics %> time<% if (analytics> 1) { %>s
+              <% } %>
+                <% } %>
+                  <br>
+
+                  <% if (uniqueFunction) { %>
+                    Uniquely viewed: <%= uniqueFunction %> time<% if (uniqueFunction> 1) { %>s
+                        <% } %>
+                          <% } %>
+
+
       </p>
       <form method="POST" action="/urls/<%= shortURL %>/edit">
         New URL: <input type="text" name="updatedURL">

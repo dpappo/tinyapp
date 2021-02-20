@@ -36,6 +36,15 @@ const users = {
 
 // now for some analytics
 const analytics = {};
+const uniques = {};
+
+const countUniques = function(object) {
+  let sum = 0;
+  for (let items in object) {
+    sum += object[items];
+  }
+  return sum;
+};
 
 // gets:
 app.get('/', (req, res) => {
@@ -98,7 +107,8 @@ app.get("/urls/:shortURL", (req, res) => {
   
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
     email: users[req.session.user_id].email,
-    analytics: analytics[req.params.shortURL]
+    analytics: analytics[req.params.shortURL],
+    uniqueFunction: countUniques(uniques)
   };
 
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
@@ -107,11 +117,11 @@ app.get("/urls/:shortURL", (req, res) => {
       link: "/login"};
     res.status(403).render("error", templateVars);
   } else {
-    if (!analytics[req.params.shortURL]) {
-      analytics[req.params.shortURL] = 1;
-    } else {
-      analytics[req.params.shortURL]++;
-    }
+    // if (!analytics[req.params.shortURL]) {
+    //   analytics[req.params.shortURL] = 1;
+    // } else {
+    //   analytics[req.params.shortURL]++;
+    // }
     res.render("urls_show", templateVars);
   }
 
@@ -133,6 +143,16 @@ app.get('/login', (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
+  if (!analytics[req.params.shortURL]) {
+    analytics[req.params.shortURL] = 1;
+  } else {
+    analytics[req.params.shortURL]++;
+  }
+
+  if (!uniques[req.session.user_id]) {
+    uniques[req.session.user_id] = 1;
+  }
+
   res.redirect(longURL);
 });
 
