@@ -34,6 +34,9 @@ const users = {
   }
 };
 
+// now for some analytics
+const analytics = {};
+
 // gets:
 app.get('/', (req, res) => {
   if (users[req.session.user_id] !== undefined) {
@@ -94,7 +97,8 @@ app.get("/urls/:shortURL", (req, res) => {
   }
   
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL,
-    email: users[req.session.user_id].email
+    email: users[req.session.user_id].email,
+    analytics: analytics[req.params.shortURL]
   };
 
   if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
@@ -103,6 +107,11 @@ app.get("/urls/:shortURL", (req, res) => {
       link: "/login"};
     res.status(403).render("error", templateVars);
   } else {
+    if (!analytics[req.params.shortURL]) {
+      analytics[req.params.shortURL] = 1;
+    } else {
+      analytics[req.params.shortURL]++;
+    }
     res.render("urls_show", templateVars);
   }
 
