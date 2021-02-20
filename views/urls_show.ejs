@@ -20,23 +20,23 @@
       </h5>
       <p class="card-text">Short URL: <a href="/u/<%= shortURL %>">
           <%= shortURL %>
-        </a> <br>
+        </a> <br><br>
         <% if (analytics) { %>
           Viewed: <%= analytics %> time<% if (analytics> 1) { %>s
               <% } %>
+                <br>
                 <% } %>
-                  <br>
 
                   <% if (uniqueFunction !=="Not viewed yet" ) { %>
                     Uniquely viewed: <%= uniqueFunction %> time<% if (uniqueFunction> 1) { %>s
+                        <br>
                         <% } %>
                           <% } %>
-                            <br>
-                            <!-- <% if (times) { %>
-                              Timestamp log:
-                              <br>
-                              <%=times %>
-                                <% } %> -->
+
+                            <pre id="json">
+Timestamp log:
+<% if (times) { %>
+<%=times %> <% } %> </pre>
 
 
       </p>

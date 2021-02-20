@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const express = require('express');
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
@@ -38,14 +39,6 @@ const users = {
 const analytics = {};
 const uniques = {};
 const visitTimes = {};
-
-const countUniques = function(object) {
-  let sum = 0;
-  for (let items in object) {
-    sum += object[items];
-  }
-  return sum;
-};
 
 // gets:
 app.get('/', (req, res) => {
@@ -110,7 +103,7 @@ app.get("/urls/:shortURL", (req, res) => {
     email: users[req.session.user_id].email,
     analytics: analytics[req.params.shortURL],
     // uniqueFunction: uniques[req.params.shortURL].length,
-    times: JSON.stringify(visitTimes)
+    times: JSON.stringify(visitTimes[req.params.shortURL], undefined, 2)
   };
 
   if (uniques[req.params.shortURL]) {
@@ -154,14 +147,16 @@ app.get("/u/:shortURL", (req, res) => {
 
   if (!uniques[req.params.shortURL]) {
     uniques[req.params.shortURL] = [req.session.user_id];
+  // eslint-disable-next-line no-empty
   } else if (uniques[req.params.shortURL].includes(req.session.user_id)) {
-    console.log("quiet, fool!");
   } else {
     uniques[req.params.shortURL].push(req.session.user_id);
   }
   
-  if (!visitTimes[new Date]) {
-    visitTimes[new Date] = req.session.user_id;
+  if (!visitTimes[req.params.shortURL]) {
+    visitTimes[req.params.shortURL] = {[new Date]: " by userID: " + req.session.user_id};
+  } else {
+    visitTimes[req.params.shortURL][new Date] = " by userID: " + req.session.user_id;
   }
   res.redirect(longURL);
 });
